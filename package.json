@@ -1,6 +1,6 @@
 {
   "name": "@fastaar/nextjs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Next.js React Server Components & Route Handlers integration for Fastaar payment gateway",
   "license": "MIT",
   "type": "module",

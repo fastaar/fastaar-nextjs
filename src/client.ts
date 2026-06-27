@@ -97,6 +97,16 @@ export class FastaarClient {
     return payments[0] ?? null;
   }
 
+  /**
+   * Refund a completed payment. Only payments with status `completed` can be refunded.
+   *
+   * @returns The updated payment object with status `refunded`.
+   * @throws FastaarError if the payment is not in a refundable state.
+   */
+  async refundPayment(paymentId: string): Promise<Payment> {
+    return this.request<Payment>('POST', `/api/v1/payments/${encodeURIComponent(paymentId)}/refund`);
+  }
+
   // ---------------------------------------------------------------------------
   // Customers
   // ---------------------------------------------------------------------------

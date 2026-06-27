@@ -154,7 +154,19 @@ const payment = await fastaar.findByInvoiceNumber('ORDER-42');
 const payments = await fastaar.listPayments({ status: 'completed', per_page: 10 });
 ```
 
-### 5. Customers
+### 5. Refund a Payment
+
+Refund a completed payment. Only payments with status `completed` can be refunded. A `payment.refunded` webhook fires automatically.
+
+```typescript
+import { getFastaarClient } from '@fastaar/nextjs';
+
+const fastaar = getFastaarClient();
+const payment = await fastaar.refundPayment('01jxyz...');
+// payment.status === 'refunded'
+```
+
+### 6. Customers
 
 Store customer records to attach them to payments collected via payment links.
 
