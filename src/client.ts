@@ -1,4 +1,13 @@
-import { CreatePaymentParams, FastaarClientOptions, ListPaymentsParams, Payment } from './types';
+import {
+  CreateCustomerParams,
+  CreatePaymentParams,
+  Customer,
+  CustomerParams,
+  FastaarClientOptions,
+  ListCustomersParams,
+  ListPaymentsParams,
+  Payment,
+} from './types';
 
 const API_BASE_URL = 'https://fastaar.com';
 
@@ -43,11 +52,15 @@ export class FastaarClient {
     this.timeoutMs = options.timeoutMs ?? 15000;
   }
 
+  // ---------------------------------------------------------------------------
+  // Payments
+  // ---------------------------------------------------------------------------
+
   /**
    * Create a payment intent. Returns the payment object including
    * `id`, `status`, and `checkout_url`.
    *
-   * Reusing the same `invoice_id` returns the existing payment instead of
+   * Reusing the same `invoice_number` returns the existing payment instead of
    * creating a duplicate, so retries are safe. Supply `success_url`/`cancel_url`
    * to return the customer to your site after checkout.
    */
@@ -77,11 +90,38 @@ export class FastaarClient {
   }
 
   /**
-   * Find the most recent payment for one of your invoice IDs, or null if none exist.
+   * Find the most recent payment for one of your invoice numbers, or null if none exist.
    */
-  async findByInvoiceId(invoiceId: string): Promise<Payment | null> {
-    const payments = await this.listPayments({ invoice_id: invoiceId });
+  async findByInvoiceNumber(invoiceNumber: string): Promise<Payment | null> {
+    const payments = await this.listPayments({ invoice_number: invoiceNumber });
     return payments[0] ?? null;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Customers
+  // ---------------------------------------------------------------------------
+
+  async listCustomers(params: ListCustomersParams = {}): Promise<Customer[]> {
+    const stringParams: Record<string, string> = {};
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined) {
+        stringParams[key] = String(value);
+      }
+    }
+    const query = new URLSearchParams(stringParams).toString();
+    return this.request<Customer[]>('GET', `/api/v1/customers${query ? `?${query}` : ''}`);
+  }
+
+  async createCustomer(params: CreateCustomerParams): Promise<Customer> {
+    return this.request<Customer>('POST', '/api/v1/customers', params);
+  }
+
+  async getCustomer(customerId: number): Promise<Customer> {
+    return this.request<Customer>('GET', `/api/v1/customers/${customerId}`);
+  }
+
+  async updateCustomer(customerId: number, params: CustomerParams): Promise<Customer> {
+    return this.request<Customer>('PATCH', `/api/v1/customers/${customerId}`, params);
   }
 
   /**

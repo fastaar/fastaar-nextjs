@@ -18,11 +18,10 @@ export interface CreatePaymentParams {
   amount: number | string;
 
   /**
-   * Your custom reference identifier for the invoice/order.
-   * Supplying the same invoice_id will retrieve the existing payment intent
-   * instead of creating a duplicate, ensuring idempotency.
+   * Your order reference / idempotency key.
+   * Retrying with the same invoice_number returns the existing payment instead of creating a duplicate.
    */
-  invoice_id?: string;
+  invoice_number: string;
 
   /**
    * The URL to redirect the customer to upon successful payment completion.
@@ -52,7 +51,7 @@ export interface ListPaymentsParams extends Record<string, string | number | und
   /**
    * Filter payments by your custom invoice/order reference.
    */
-  invoice_id?: string;
+  invoice_number?: string;
 
   /**
    * Number of payments to return per page.
@@ -69,65 +68,76 @@ export interface ListPaymentsParams extends Record<string, string | number | und
  * Representation of a payment object returned by the Fastaar API.
  */
 export interface Payment {
-  /**
-   * Unique Fastaar transaction identifier.
-   */
   id: string;
-
-  /**
-   * The transaction amount.
-   */
   amount: string;
-
-  /**
-   * The associated invoice ID supplied when the payment was created.
-   */
-  invoice_id?: string;
-
-  /**
-   * The current status of the payment (e.g., 'completed', 'pending', 'cancelled').
-   */
-  status: string;
-
-  /**
-   * The secure hosted checkout URL where the customer completes payment.
-   */
-  checkout_url: string;
-
-  /**
-   * The customer's mobile number, if paid (e.g. bKash or Nagad wallet number).
-   */
-  wallet_number?: string;
-
-  /**
-   * The payment method used (e.g., 'bkash', 'nagad').
-   */
-  payment_method?: string;
-
-  /**
-   * Transaction ID from the mobile operator/gateway (e.g. bKash trxID).
-   */
-  trx_id?: string;
-
-  /**
-   * Indicates whether this payment is live or test mode.
-   */
+  amount_due: string;
+  gateway_charge: string;
+  gateway_charge_type: 'percentage' | 'fixed' | null;
+  gateway_charge_value: string | null;
+  currency: string;
   livemode: boolean;
-
-  /**
-   * Arbitrary metadata stored on the payment.
-   */
+  source: string;
+  status: string;
+  invoice_number: string;
+  customer_id?: number;
+  provider?: string;
+  payment_method?: string;
+  customer_trx_id?: string;
+  customer_sender_number?: string;
   metadata?: Record<string, string>;
-
-  /**
-   * Payment creation timestamp.
-   */
+  failure_reason?: string;
+  success_url?: string;
+  cancel_url?: string;
+  checkout_url: string;
+  expires_at: string;
+  verified_at?: string;
   created_at: string;
+}
 
-  /**
-   * Payment completion timestamp (if completed).
-   */
-  completed_at?: string;
+/**
+ * Parameters for updating a customer (all fields optional).
+ */
+export interface CustomerParams {
+  name?: string;
+  phone?: string;
+  email?: string | null;
+  address?: string | null;
+  notes?: string | null;
+}
+
+/**
+ * Parameters for creating a customer.
+ */
+export interface CreateCustomerParams {
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  notes?: string;
+}
+
+/**
+ * A customer object returned by the Fastaar API.
+ */
+export interface Customer {
+  id: number;
+  name: string;
+  email?: string;
+  phone: string;
+  address?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Parameters for querying the list of customers.
+ */
+export interface ListCustomersParams extends Record<string, string | number | undefined> {
+  email?: string;
+  phone?: string;
+  per_page?: number;
+  page?: number;
 }
 
 /**

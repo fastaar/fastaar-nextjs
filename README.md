@@ -52,7 +52,7 @@ export default function CheckoutPage() {
       <CheckoutButton
         paymentParams={{
           amount: 1250,
-          invoice_id: 'ORDER-42',
+          invoice_number: 'ORDER-42',
           success_url: 'https://your-site.com/thanks',
           cancel_url: 'https://your-site.com/cart',
           metadata: { userId: 'usr_1001' },
@@ -85,7 +85,7 @@ export default function CheckoutPage() {
     const fastaar = getFastaarClient();
     const payment = await fastaar.createPayment({
       amount: 1250,
-      invoice_id: 'ORDER-42',
+      invoice_number: 'ORDER-42',
       success_url: 'https://your-site.com/thanks',
       cancel_url: 'https://your-site.com/cart',
     });
@@ -122,13 +122,13 @@ export async function POST(req: Request) {
   // Handle the webhook event
   if (event.event === 'payment.completed') {
     const payment = event.data;
-    const invoiceId = payment.invoice_id; // e.g. 'ORDER-42'
-    const trxId = payment.trx_id;         // operator transaction ID
-    
+    const invoiceNumber = payment.invoice_number;       // your order reference, e.g. 'ORDER-42'
+    const trxId = payment.customer_trx_id;             // operator transaction ID
+
     // Mark order as paid in database idempotently
-    // await db.order.update({ where: { id: invoiceId }, data: { paid: true, trxId } });
+    // await db.order.update({ where: { id: invoiceNumber }, data: { paid: true, trxId } });
     
-    console.log(`Payment completed for invoice ${invoiceId}`);
+    console.log(`Payment completed for invoice ${invoiceNumber}`);
   }
 
   return new NextResponse('OK', { status: 200 });
@@ -137,7 +137,7 @@ export async function POST(req: Request) {
 
 ### 4. Fetching Payment Details
 
-To manually fetch details for a payment or invoice:
+To manually fetch details for a payment:
 
 ```typescript
 import { getFastaarClient } from '@fastaar/nextjs';
@@ -147,11 +147,35 @@ const fastaar = getFastaarClient();
 // Get by Fastaar payment ID
 const payment = await fastaar.getPayment('01jxyz...');
 
-// Look up by your own invoice ID
-const payment = await fastaar.findByInvoiceId('ORDER-42');
+// Look up by your own order reference
+const payment = await fastaar.findByInvoiceNumber('ORDER-42');
 
 // List payments
 const payments = await fastaar.listPayments({ status: 'completed', per_page: 10 });
+```
+
+### 5. Customers
+
+Store customer records to attach them to payments collected via payment links.
+
+```typescript
+import { getFastaarClient } from '@fastaar/nextjs';
+
+const fastaar = getFastaarClient();
+
+// Create a customer — name and phone are required
+const customer = await fastaar.createCustomer({
+  name:    'Rahim Uddin',
+  phone:   '01712345678',
+  email:   'rahim@example.com',   // optional
+  address: 'Dhaka, Bangladesh',   // optional
+  notes:   'VIP customer',        // optional
+});
+
+// Retrieve, update, list
+const fetched   = await fastaar.getCustomer(customer.id);
+const updated   = await fastaar.updateCustomer(customer.id, { name: 'Rahim Ahmed' });
+const customers = await fastaar.listCustomers({ email: 'rahim@example.com' });
 ```
 
 ## License
