@@ -1,5 +1,9 @@
 # Fastaar Next.js integration
 
+[![CI](https://github.com/fastaar/fastaar-nextjs/actions/workflows/ci.yml/badge.svg)](https://github.com/fastaar/fastaar-nextjs/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/%40fastaar%2Fnextjs.svg)](https://www.npmjs.com/package/@fastaar/nextjs)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Accept bKash & Nagad payments in your Next.js application using [Fastaar](https://fastaar.com).
 
 This package is optimized for the Next.js App Router, featuring full support for **React Server Components (RSC)**, **Server Actions**, and Next.js **Route Handlers** for webhook signature verification. Written entirely in TypeScript.
