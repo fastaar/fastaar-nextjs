@@ -90,6 +90,7 @@ export default function CheckoutPage() {
     const payment = await fastaar.createPayment({
       amount: 1250,
       invoice_number: 'ORDER-42',
+      customer_id: customer?.id, // optional — attach an existing customer
       success_url: 'https://your-site.com/thanks',
       cancel_url: 'https://your-site.com/cart',
     });
@@ -168,6 +169,11 @@ import { getFastaarClient } from '@fastaar/nextjs';
 const fastaar = getFastaarClient();
 const payment = await fastaar.refundPayment('01jxyz...');
 // payment.status === 'refunded'
+
+const partial = await fastaar.refundPayment('01jxyz...', 200); // refund only part of it
+// partial.status === 'partially_refunded'
+
+const refunds = await fastaar.listRefunds('01jxyz...'); // full refund history, newest first
 ```
 
 ### 6. Customers

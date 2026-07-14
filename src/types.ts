@@ -19,9 +19,16 @@ export interface CreatePaymentParams {
 
   /**
    * Your order reference / idempotency key.
-   * Retrying with the same invoice_number returns the existing payment instead of creating a duplicate.
+   * Retrying with the same invoice_number while a previous payment for it is still
+   * active (not `failed`/`expired`) throws a FastaarError with errorType
+   * `duplicate_invoice_number` (HTTP 409) instead of creating a duplicate.
    */
   invoice_number: string;
+
+  /**
+   * An existing customer to attach to this payment. Must belong to your merchant account.
+   */
+  customer_id?: number;
 
   /**
    * The URL to redirect the customer to upon successful payment completion.
@@ -71,6 +78,7 @@ export interface Payment {
   id: string;
   amount: string;
   amount_due: string;
+  refunded_amount: string;
   gateway_charge: string;
   gateway_charge_type: 'percentage' | 'fixed' | null;
   gateway_charge_value: string | null;
@@ -91,6 +99,17 @@ export interface Payment {
   checkout_url: string;
   expires_at: string;
   verified_at?: string;
+  created_at: string;
+}
+
+/**
+ * A single refund event on a payment — one per refund call, even across several
+ * partial refunds.
+ */
+export interface Refund {
+  id: number;
+  amount: string;
+  source: 'api' | 'panel';
   created_at: string;
 }
 
